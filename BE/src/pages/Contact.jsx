@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Mail, 
@@ -11,6 +11,54 @@ import {
 } from "lucide-react";
 
 export default function Contact() {
+
+
+  const [formData, setFormData] = useState({
+  name: "",
+  email: "",
+  interest: "Courier & Logistics",
+  message: "",
+});
+const [status, setStatus] = useState("");
+
+
+
+const handleChange = (e) => {
+  setFormData({
+    ...formData,
+    [e.target.name]: e.target.value,
+  });
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setStatus("Sending...");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    if (res.ok) {
+      setStatus("Message sent successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        interest: "Courier & Logistics",
+        message: "",
+      });
+    } else {
+      setStatus("Failed to send message");
+    }
+  } catch {
+    setStatus("Server error");
+  }
+};
+
+
+
   const contactInfo = [
     { 
       icon: <Mail size={20} />, 
@@ -113,21 +161,21 @@ export default function Contact() {
               <Clock className="text-[#C9A24D]/20" size={80} />
             </div>
 
-            <form className="space-y-6 relative z-10">
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase ml-2">Full Name</label>
-                  <input type="text"  className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors" />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase ml-2">Email Address</label>
-                  <input type="email"  className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors" />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase ml-2">Interested In</label>
-                <select className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors appearance-none">
+                <select name="interest" value={formData.interest} onChange={handleChange} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors appearance-none">
                   <option>Courier & Logistics</option>
                   <option>Credit Restoration</option>
                   <option>Business Formation</option>
@@ -137,16 +185,17 @@ export default function Contact() {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase ml-2">Your Mission</label>
-                <textarea rows="4" placeholder="How can we help you rise?" className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors resize-none"></textarea>
+                <textarea name="message" value={formData.message} onChange={handleChange} rows="4" placeholder="How can we help you rise?" className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-[#C9A24D] transition-colors resize-none"></textarea>
               </div>
 
-              <motion.button 
+              <motion.button type="submit"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-[#C9A24D] text-black font-black py-5 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-widest text-sm shadow-[0_20px_40px_rgba(201,162,77,0.2)]"
               >
                 Send Message <Send size={18} />
               </motion.button>
+              {status && <p className="text-center text-sm mt-4">{status}</p>}
             </form>
           </motion.div>
         </div>
